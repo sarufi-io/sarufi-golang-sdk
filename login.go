@@ -1,9 +1,7 @@
 package sarufi
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -21,15 +19,13 @@ type (
 )
 
 func login(ctx context.Context, client *http.Client, url, method string, request *LoginRequest) (*LoginResponse, error) {
-	reqBody, err := json.Marshal(request)
-	if err != nil {
-		return nil, fmt.Errorf("login: marshal request: %w", err)
+	headers := map[string]string{
+		"Content-Type": "application/json",
 	}
-	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(reqBody))
+	req, err := createRequest(ctx, method, url, request, headers)
 	if err != nil {
-		return nil, fmt.Errorf("login: create request: %w", err)
+		return nil, fmt.Errorf("login: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("login: request execute: %w", err)
