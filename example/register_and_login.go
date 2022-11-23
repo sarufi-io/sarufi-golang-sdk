@@ -1,16 +1,21 @@
-# sarufi-golang-sdk
-Golang SDK for sarufi conversational AI platform 
+package main
 
+import (
+	"context"
+	"fmt"
+	"github.com/sarufi-io/sarufi-golang-sdk"
+	"net/http"
+	"os"
+)
 
-## login and registration of a new bot
+func main() {
 
-```go
-    client := sarufi.NewClient(
+	client := sarufi.NewClient(
 		sarufi.WithHttpClient(http.DefaultClient),
 		sarufi.WithLogger(os.Stdout),
 		sarufi.WithDebug(true))
 
-	// Register a new user 
+	// Register a new user
 	registerRequest := &sarufi.RegisterRequest{
 		Username: "",
 		Password: "",
@@ -35,4 +40,5 @@ Golang SDK for sarufi conversational AI platform
 	}
 
 	fmt.Printf("login response: %+v\n", loginResponse)
-```
+
+}
