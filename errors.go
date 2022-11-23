@@ -7,9 +7,10 @@ import (
 
 type (
 	RequestError struct {
-		Detail string `json:"detail"`
+		Detail  string `json:"detail,omitempty"`
+		Message string `json:"message,omitempty"`
 	}
-	
+
 	ValidationErrorDetail struct {
 		Loc  []string `json:"loc"`
 		Msg  string   `json:"msg"`
@@ -20,6 +21,13 @@ type (
 		Detail []ValidationErrorDetail `json:"detail"`
 	}
 )
+
+func (re *RequestError) Error() string {
+	if re != nil {
+		return fmt.Sprintf("request error: %s", strings.Join([]string{re.Detail, re.Message}, ", "))
+	}
+	return ""
+}
 
 // String returns the string representation of the ValidationErrorDetail
 func (v *ValidationErrorDetail) String() string {

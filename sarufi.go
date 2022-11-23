@@ -1,7 +1,9 @@
 package sarufi
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -89,4 +91,38 @@ func (c *Client) Register(ctx context.Context, request *RegisterRequest) (*Regis
 func (c *Client) ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error) {
 	//TODO implement me
 	panic("implement me")
+}
+
+// parseResponse takes a http.Response and a v which is a struct to which the body
+// will be unmarshalled add returns an error
+func parseResponse(response *http.Response, v any) error {
+	statusCode := response.StatusCode
+	defer response.Body.Close()
+	bodyBytes, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("parse response: %w", err)
+	}
+
+	if statusCode == 200 || statusCode == 201 {
+		decodeErr := json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(v)
+		if decodeErr != nil {
+			return fmt.Errorf("parse response: %w", decodeErr)
+		}
+	} else if statusCode == 422 {
+		var validationError ValidationError
+		if err := json.NewDecoder(bytes.NewBuffer(bodyBytes)).Decode(&validationError); err != nil {
+			return fmt.Errorf("parse response: %w", err)
+		}
+		return fmt.Errorf("parse response: %w", &validationError)
+	} else if statusCode == 400 {
+		var requestError RequestError
+		if err := json.NewDecoder(bytes.NewBuffer(bodyBytes)).Decode(&requestError); err != nil {
+			return fmt.Errorf("parse response: %w", err)
+		}
+		return fmt.Errorf("parse response: %w", &requestError)
+	} else {
+		return fmt.Errorf("parse response: %s", string(bodyBytes))
+	}
+
+	return nil
 }

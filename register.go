@@ -40,24 +40,11 @@ func register(ctx context.Context, client *http.Client, url, method string,
 	if err != nil {
 		return nil, fmt.Errorf("register: request execute: %w", err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		var registerResponse RegisterResponse
-		if err := json.NewDecoder(resp.Body).Decode(&registerResponse); err != nil {
-			return nil, fmt.Errorf("register: decode register response: %w", err)
-		}
-		return &registerResponse, nil
-	} else if resp.StatusCode == http.StatusUnprocessableEntity {
-		var validationError ValidationError
-		if err := json.NewDecoder(resp.Body).Decode(&validationError); err != nil {
-			return nil, fmt.Errorf("register: decode validation error: %w", err)
-		}
-		return nil, fmt.Errorf("register: %w", &validationError)
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return nil, fmt.Errorf("register: read response body: %w", err)
-		}
-		return nil, fmt.Errorf("register: %s", responseBody.String())
+	var registerResponse RegisterResponse
+	err = parseResponse(resp, &registerResponse)
+	if err != nil {
+		return nil, fmt.Errorf("register: %w", err)
 	}
+
+	return &registerResponse, nil
 }
