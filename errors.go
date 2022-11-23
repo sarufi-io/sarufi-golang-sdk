@@ -6,6 +6,10 @@ import (
 )
 
 type (
+	RequestError struct {
+		Detail string `json:"detail"`
+	}
+	
 	ValidationErrorDetail struct {
 		Loc  []string `json:"loc"`
 		Msg  string   `json:"msg"`

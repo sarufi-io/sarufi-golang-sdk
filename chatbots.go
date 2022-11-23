@@ -10,9 +10,6 @@ import (
 )
 
 type (
-	ChatbotRequestError struct {
-		Detail string `json:"detail"`
-	}
 	Intents map[string][]string
 	Flow    struct {
 		Message   []string `json:"message"`
@@ -131,7 +128,7 @@ type (
 
 // chatbotCreate creates a chatbot. It returns a Chatbot in case the request is successful
 // returns content of the response body and an error if the request fails and the
-// code is not 400. If the code is 400, it returns a ChatbotRequestError contents.
+// code is not 400. If the code is 400, it returns a RequestError contents.
 func chatbotCreate(ctx context.Context, client *http.Client, url, method string, request *ChatbotCreateReq) (*Chatbot, error) {
 	reqBody, err := json.Marshal(request)
 	if err != nil {
@@ -148,7 +145,7 @@ func chatbotCreate(ctx context.Context, client *http.Client, url, method string,
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusBadRequest {
-		var errResp ChatbotRequestError
+		var errResp RequestError
 		err = json.NewDecoder(resp.Body).Decode(&errResp)
 		if err != nil {
 			return nil, fmt.Errorf("chatbot create: %w", err)
@@ -197,7 +194,7 @@ func getChatbot(ctx context.Context, client *http.Client, reqURL, method string,
 		}
 		return &respBody, nil
 	} else if resp.StatusCode == 400 {
-		var errResp ChatbotRequestError
+		var errResp RequestError
 		err = json.NewDecoder(resp.Body).Decode(&errResp)
 		if err != nil {
 			return nil, fmt.Errorf("get chatbot: %w", err)
@@ -233,7 +230,7 @@ func listChatBots(ctx context.Context, client *http.Client, reqURL, method, toke
 		}
 		return respBody, nil
 	} else if resp.StatusCode == 400 {
-		var errResp ChatbotRequestError
+		var errResp RequestError
 		err = json.NewDecoder(resp.Body).Decode(&errResp)
 		if err != nil {
 			return nil, fmt.Errorf("list chatbots: %w", err)
@@ -278,7 +275,7 @@ func updateChatbot(ctx context.Context, client *http.Client, reqURL, method stri
 		}
 		return &respBody, nil
 	} else if resp.StatusCode == 400 {
-		var errResp ChatbotRequestError
+		var errResp RequestError
 		err = json.NewDecoder(resp.Body).Decode(&errResp)
 		if err != nil {
 			return nil, fmt.Errorf("update chatbot: %w", err)
@@ -314,7 +311,7 @@ func deleteChatbot(ctx context.Context, client *http.Client, reqURL, method stri
 	if resp.StatusCode == http.StatusOK {
 		return nil
 	} else if resp.StatusCode == 400 {
-		var errResp ChatbotRequestError
+		var errResp RequestError
 		err = json.NewDecoder(resp.Body).Decode(&errResp)
 		if err != nil {
 			return fmt.Errorf("delete chatbot: %w", err)
