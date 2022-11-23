@@ -31,7 +31,7 @@ func login(ctx context.Context, client *http.Client, url, method string, request
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
-
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("login: request execute: %w", err)
 	}

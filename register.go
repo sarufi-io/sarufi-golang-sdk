@@ -40,6 +40,7 @@ func register(ctx context.Context, client *http.Client, url, method string,
 	if err != nil {
 		return nil, fmt.Errorf("register: request execute: %w", err)
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
 		var registerResponse RegisterResponse
 		if err := json.NewDecoder(resp.Body).Decode(&registerResponse); err != nil {
