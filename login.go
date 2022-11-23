@@ -29,6 +29,7 @@ func login(ctx context.Context, client *http.Client, url, method string, request
 	if err != nil {
 		return nil, fmt.Errorf("login: create request: %w", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 
 	if err != nil {
