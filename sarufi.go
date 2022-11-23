@@ -14,6 +14,7 @@ const (
 	UsersLoginEndpoint    = "/users/login"
 	UsersRegisterEndpoint = "/users/register"
 	ChatbotEndpoint       = "/chatbot"
+	ListChatbotsEndpoint  = "/chatbots"
 )
 
 var _ Service = (*Client)(nil)
@@ -32,7 +33,7 @@ type (
 	Service interface {
 		Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error)
 		Register(ctx context.Context, request *RegisterRequest) (*RegisterResponse, error)
-		ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*ChatbotCreateResp, error)
+		ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error)
 	}
 )
 
@@ -85,7 +86,7 @@ func (c *Client) Register(ctx context.Context, request *RegisterRequest) (*Regis
 	return register(ctx, c.http, registerURL, http.MethodPost, request)
 }
 
-func (c *Client) ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*ChatbotCreateResp, error) {
+func (c *Client) ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error) {
 	//TODO implement me
 	panic("implement me")
 }
