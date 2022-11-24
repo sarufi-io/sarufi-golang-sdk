@@ -9,7 +9,11 @@ import (
 	"os"
 )
 
-var _ Service = (*Client)(nil)
+var (
+	_ Service             = (*Client)(nil)
+	_ BotService          = (*Client)(nil)
+	_ ConversationService = (*Client)(nil)
+)
 
 type (
 	// Client is the sarufi client
@@ -69,9 +73,4 @@ func (c *Client) Register(ctx context.Context, request *RegisterRequest) (*Regis
 		return nil, fmt.Errorf("register: join url: %w", err)
 	}
 	return register(ctx, c.http, registerURL, http.MethodPost, request)
-}
-
-func (c *Client) ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error) {
-	//TODO implement me
-	panic("implement me")
 }

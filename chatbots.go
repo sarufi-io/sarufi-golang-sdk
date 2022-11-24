@@ -125,6 +125,14 @@ type (
 		ID    int    `json:"id"`
 		Token string `json:"token"`
 	}
+
+	BotService interface {
+		CreateBot(ctx context.Context, req *ChatbotCreateReq) (*Chatbot, error)
+		GetBot(ctx context.Context, req *GetChatBotReq) (*Chatbot, error)
+		DeleteBot(ctx context.Context, req *DeleteChatbotReq) error
+		UpdateBot(ctx context.Context, req *UpdateChatbotReq) (*Chatbot, error)
+		ListBots(ctx context.Context, token string) ([]*Chatbot, error)
+	}
 )
 
 // chatbotCreate creates a chatbot. It returns a Chatbot in case the request is successful

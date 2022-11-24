@@ -28,6 +28,10 @@ type (
 		Memory    map[string]string `json:"memory"`
 		NextState string            `json:"next_state"`
 	}
+
+	ConversationService interface {
+		MakeConversation(ctx context.Context, req *ConversationRequest) (*ConversationResponse, error)
+	}
 )
 
 // makeConversationRequest makes a request to the Sarufi API to get a response
