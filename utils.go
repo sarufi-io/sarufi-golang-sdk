@@ -13,16 +13,23 @@ import (
 	"github.com/tidwall/pretty"
 )
 
+// For Error Loggings
 var infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 var errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
 
+// Type Flow to create a new Flow XD.
+// Message is a slice of strings.
+// NextState is simply a string.
 type Flow struct {
 	Message   []string `json:"message"`
 	NextState string   `json:"next_state"`
 }
 
+// Type Flows to map a string to the type Flow.
 type Flows map[string]Flow
 
+// Type Bot. All the fields are matched to the API
+// JSON response.
 type Bot struct {
 	Id                 int                 `json:"id"`
 	Name               string              `json:"name"`
@@ -36,6 +43,10 @@ type Bot struct {
 	token              string
 }
 
+// CreateIntents method to create a new intent.
+// It accepts a string that contains the intents
+// arranged in JSON format. It also acceps a
+// json file (eg: intents.json)
 func (bot *Bot) CreateIntents(intents string) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bot exists")
@@ -69,6 +80,9 @@ func (bot *Bot) CreateIntents(intents string) {
 	infoLog.Println("Intents created successfully")
 }
 
+// AddIntent method to add a new intent. It accepts a string
+// that will be the title of the intent, and a slice of message
+// strings that will be the intent content.
 func (bot *Bot) AddIntent(title string, message []string) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bot exists")
@@ -78,6 +92,9 @@ func (bot *Bot) AddIntent(title string, message []string) {
 	infoLog.Println("Intent added successfully")
 }
 
+// DeleteIntent method to delete a specific intent.
+// The accepted string is the title of the intent.
+// If the title does not exist no error will be displayed.
 func (bot *Bot) DeleteIntent(title string) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bots exist")
@@ -87,6 +104,10 @@ func (bot *Bot) DeleteIntent(title string) {
 	infoLog.Println("Intent has been deleted")
 }
 
+// CreateFlows method to create a new flow.
+// It accepts a string that contains the flows
+// arranged in JSON format. It also acceps a
+// json file (eg: flows.json)
 func (bot *Bot) CreateFlows(flows string) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bot exists")
@@ -120,6 +141,9 @@ func (bot *Bot) CreateFlows(flows string) {
 	infoLog.Println("Flows created successfully")
 }
 
+// AddFlow method to add a new flow. It accepts a string
+// that will be the title of the flow, and a type flow
+// that will be the flow content.
 func (bot *Bot) AddFlow(node string, flow Flow) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bot exists")
@@ -129,6 +153,9 @@ func (bot *Bot) AddFlow(node string, flow Flow) {
 	infoLog.Println("Flow added successfully")
 }
 
+// DeleteFlow method to delete a specific flow.
+// The accepted string is the title of the flow.
+// If the title does not exist no error will be displayed.
 func (bot *Bot) DeleteFlow(title string) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bots exist")
@@ -138,6 +165,9 @@ func (bot *Bot) DeleteFlow(title string) {
 	infoLog.Println("Flow has been deleted")
 }
 
+// To get bot responses from the API. It accepts message
+// which should be a string. And a messageType which should
+// also be a string.
 func (bot *Bot) Respond(message, messageType string) {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bot exists")
@@ -185,6 +215,9 @@ func (bot *Bot) Respond(message, messageType string) {
 
 }
 
+// To get the current and next state of the chat. It
+// accepts no parameters. It will display the JSON 
+// response from the API.
 func (bot *Bot) ChatState() {
 	if bot.Id == 0 {
 		errorLog.Fatal("No bot exists")
@@ -227,6 +260,8 @@ func (bot *Bot) ChatState() {
 	infoLog.Println(string(pretty.Pretty(body)))
 }
 
+// A helper function to check if a file exists. It
+// accepts a filename string and returns a bool.
 func fileChecker(fileName string) bool {
 	_, error := os.Stat(fileName)
 
