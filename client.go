@@ -9,14 +9,6 @@ import (
 	"os"
 )
 
-const (
-	BaseURL               = "https://api.sarufi.io"
-	UsersLoginEndpoint    = "/users/login"
-	UsersRegisterEndpoint = "/users/register"
-	ChatbotEndpoint       = "/chatbot"
-	ListChatbotsEndpoint  = "/chatbots"
-)
-
 var _ Service = (*Client)(nil)
 
 type (
@@ -28,13 +20,6 @@ type (
 	}
 
 	ClientOption func(*Client)
-
-	// Service is a sarufi api interface ..
-	Service interface {
-		Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error)
-		Register(ctx context.Context, request *RegisterRequest) (*RegisterResponse, error)
-		ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error)
-	}
 )
 
 // WithHttpClient sets the http client for the client

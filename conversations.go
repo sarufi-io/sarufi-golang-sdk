@@ -45,7 +45,9 @@ func makeConversation(ctx context.Context, client *http.Client, reqURL, method s
 		return nil, fmt.Errorf("make conversation: %w", err)
 	}
 	resp, err := client.Do(request)
-	defer resp.Body.Close()
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("make conversation: %w", err)
 	}

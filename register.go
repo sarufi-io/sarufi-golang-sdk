@@ -37,6 +37,9 @@ func register(ctx context.Context, client *http.Client, url, method string,
 	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("register: request execute: %w", err)
 	}

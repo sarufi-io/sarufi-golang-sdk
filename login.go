@@ -27,6 +27,9 @@ func login(ctx context.Context, client *http.Client, url, method string, request
 		return nil, fmt.Errorf("login: %w", err)
 	}
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("login: request execute: %w", err)
 	}
