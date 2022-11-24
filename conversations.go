@@ -3,7 +3,6 @@ package sarufi
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -38,48 +37,24 @@ func makeConversation(ctx context.Context, client *http.Client, reqURL, method s
 	if req.Type == WhatsappConversation {
 		reqURL = reqURL + "/whatsapp"
 	}
-	reqBody, err := json.Marshal(req)
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": fmt.Sprint("Bearer %s", req.Token),
+	}
+	request, err := createRequest(ctx, method, reqURL, bytes.NewBuffer(reqBody), headers)
 	if err != nil {
 		return nil, fmt.Errorf("make conversation: %w", err)
 	}
-	request, err := http.NewRequestWithContext(ctx, method, reqURL, bytes.NewBuffer(reqBody))
-	if err != nil {
-		return nil, fmt.Errorf("make conversation: %w", err)
-	}
-	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+req.Token)
 	resp, err := client.Do(request)
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("make conversation: %w", err)
 	}
-
-	// If Ok return the ConversationResponse, if 422 return a validation error
-	// if 400 return a RequestError, if anything else return the response body
-	// as an error
-	if resp.StatusCode == http.StatusOK {
-		var conversationResponse ConversationResponse
-		if err := json.NewDecoder(resp.Body).Decode(&conversationResponse); err != nil {
-			return nil, fmt.Errorf("make conversation: %w", err)
-		}
-		return &conversationResponse, nil
-	} else if resp.StatusCode == 400 {
-		var requestError RequestError
-		if err := json.NewDecoder(resp.Body).Decode(&requestError); err != nil {
-			return nil, fmt.Errorf("make conversation: %w", err)
-		}
-		return nil, fmt.Errorf("make conversation: %s", requestError.Detail)
-	} else if resp.StatusCode == http.StatusUnprocessableEntity {
-		var validationError ValidationError
-		if err := json.NewDecoder(resp.Body).Decode(&validationError); err != nil {
-			return nil, fmt.Errorf("make conversation: %w", err)
-		}
-		return nil, fmt.Errorf("make conversation: %w", &validationError)
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return nil, fmt.Errorf("make conversation: %w", err)
-		}
-		return nil, fmt.Errorf("make conversation: %s", responseBody.String())
+	var conversationResponse ConversationResponse
+	err = parseResponse(resp, &conversationResponse)
+	if err != nil {
+		return nil, fmt.Errorf("make conversation: %w", err)
 	}
+
+	return &conversationResponse, nil
 }
