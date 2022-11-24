@@ -10,7 +10,7 @@ import (
 
 // Initialize() method to generate a token for the user.
 // It will assign the generated token to Bot.token for
-// all future use.
+// all subsequent use.
 func (bot *Bot) Initialize(username, password string) {
   bot.baseURL = "https://api.sarufi.io/"
   infoLog.Println("Getting Token...")
