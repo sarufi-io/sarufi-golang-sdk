@@ -74,3 +74,33 @@ func (c *Client) Register(ctx context.Context, request *RegisterRequest) (*Regis
 	}
 	return register(ctx, c.http, registerURL, http.MethodPost, request)
 }
+
+func (c *Client) MakeConversation(ctx context.Context, req *ConversationRequest) (*ConversationResponse, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) CreateBot(ctx context.Context, req *ChatbotCreateReq) (*Chatbot, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) GetBot(ctx context.Context, req *GetChatBotReq) (*Chatbot, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) DeleteBot(ctx context.Context, req *DeleteChatbotReq) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) UpdateBot(ctx context.Context, req *UpdateChatbotReq) (*Chatbot, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c *Client) ListBots(ctx context.Context, token string) ([]*Chatbot, error) {
+	//TODO implement me
+	panic("implement me")
+}
