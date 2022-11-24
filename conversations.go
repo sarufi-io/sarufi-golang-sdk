@@ -38,7 +38,7 @@ func makeConversation(ctx context.Context, client *http.Client, reqURL, method s
 	}
 	headers := map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprint("Bearer %s", req.Token),
+		"Authorization": fmt.Sprintf("Bearer %s", req.Token),
 	}
 	request, err := createRequest(ctx, method, reqURL, req, headers)
 	if err != nil {
