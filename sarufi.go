@@ -18,6 +18,6 @@ type (
 	Service interface {
 		Login(ctx context.Context, request *LoginRequest) (*LoginResponse, error)
 		Register(ctx context.Context, request *RegisterRequest) (*RegisterResponse, error)
-		//ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error)
+		// ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (*Chatbot, error)
 	}
 )

@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/sarufi-io/sarufi-golang-sdk"
 )
 
 func main() {
-
 	//client := sarufi.NewClient(
 	//	sarufi.WithHttpClient(http.DefaultClient),
 	//	sarufi.WithLogger(os.Stdout),
@@ -90,5 +90,4 @@ func main() {
 
 	// print the json
 	fmt.Printf("create request: %s\n", string(createReqJson))
-
 }

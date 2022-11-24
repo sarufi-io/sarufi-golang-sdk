@@ -26,7 +26,8 @@ type (
 // unless there is an error or the response status code is http.StatusUnprocessableEntity
 // where contents of ValidationError is returned. Else, the response body is returned as an error
 func register(ctx context.Context, client *http.Client, url, method string,
-	request *RegisterRequest) (*RegisterResponse, error) {
+	request *RegisterRequest,
+) (*RegisterResponse, error) {
 	reqBody, err := json.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("register: marshal request: %w", err)

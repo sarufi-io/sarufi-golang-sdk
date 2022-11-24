@@ -12,8 +12,10 @@ import (
 	"github.com/tidwall/pretty"
 )
 
-var infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-var errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
+var (
+	infoLog  = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
+)
 
 type Bot struct {
 	Id                 int    `json:"id"`
@@ -36,7 +38,6 @@ func (bot *Bot) GetBot(id int) *Bot {
 	infoLog.Printf("Getting bot with id: %d", id)
 	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, id)
 	req, err := http.NewRequest("GET", url, nil)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -54,7 +55,6 @@ func (bot *Bot) GetBot(id int) *Bot {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -65,14 +65,12 @@ func (bot *Bot) GetBot(id int) *Bot {
 	}
 
 	return bot
-
 }
 
 func (bot *Bot) GetBots() {
 	infoLog.Print("Getting bots")
 	url := bot.baseURL + "chatbots"
 	req, err := http.NewRequest("GET", url, nil)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -90,13 +88,11 @@ func (bot *Bot) GetBots() {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 
 	infoLog.Println(string(pretty.Pretty(body)))
-
 }
 
 func (bot *Bot) CreateBot(name, description, industry string) *Bot {
@@ -117,12 +113,10 @@ func (bot *Bot) CreateBot(name, description, industry string) *Bot {
 	}
 
 	jsonParams, err := json.Marshal(params)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonParams))
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -140,7 +134,6 @@ func (bot *Bot) CreateBot(name, description, industry string) *Bot {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -165,13 +158,11 @@ func (bot *Bot) UpdateBot(id int) *Bot {
 	}
 
 	jsonParams, err := json.Marshal(params)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, id)
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonParams))
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -189,20 +180,17 @@ func (bot *Bot) UpdateBot(id int) *Bot {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 	infoLog.Println(string(pretty.Pretty(body)))
 	return bot
-
 }
 
 func (bot *Bot) DeleteBot(id int) {
 	infoLog.Printf("Deleting bot with id: %d", id)
 	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, id)
 	req, err := http.NewRequest("DELETE", url, nil)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -220,11 +208,9 @@ func (bot *Bot) DeleteBot(id int) {
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 
 	infoLog.Println(string(pretty.Pretty(body)))
-
 }

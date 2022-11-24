@@ -174,7 +174,8 @@ func getChatbot(ctx context.Context, client *http.Client, reqURL, method string,
 	}
 	headers := map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprintf("Bearer %s", request.Token)}
+		"Authorization": fmt.Sprintf("Bearer %s", request.Token),
+	}
 	req, err := createRequest(ctx, method, getChatbotURL, nil, headers)
 	if err != nil {
 		return nil, fmt.Errorf("get chatbot: %w", err)
@@ -197,7 +198,8 @@ func getChatbot(ctx context.Context, client *http.Client, reqURL, method string,
 func listChatBots(ctx context.Context, client *http.Client, reqURL, method, token string) ([]*Chatbot, error) {
 	headers := map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprintf("Bearer %s", token)}
+		"Authorization": fmt.Sprintf("Bearer %s", token),
+	}
 	req, err := createRequest(ctx, method, reqURL, nil, headers)
 	if err != nil {
 		return nil, fmt.Errorf("list chatbots: %w", err)
@@ -227,7 +229,8 @@ func updateChatbot(ctx context.Context, client *http.Client, reqURL, method stri
 	}
 	headers := map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprintf("Bearer %s", request.Token)}
+		"Authorization": fmt.Sprintf("Bearer %s", request.Token),
+	}
 	req, err := createRequest(ctx, method, updateChatbotURL, request, headers)
 	if err != nil {
 		return nil, fmt.Errorf("update chatbot: %w", err)
@@ -256,7 +259,8 @@ func deleteChatbot(ctx context.Context, client *http.Client, reqURL, method stri
 	}
 	headers := map[string]string{
 		"Content-Type":  "application/json",
-		"Authorization": fmt.Sprintf("Bearer %s", request.Token)}
+		"Authorization": fmt.Sprintf("Bearer %s", request.Token),
+	}
 	req, err := createRequest(ctx, method, deleteChatbotURL, nil, headers)
 	if err != nil {
 		return fmt.Errorf("delete chatbot: %w", err)
