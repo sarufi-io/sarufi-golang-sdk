@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/sarufi-io/sarufi-golang-sdk"
+	"github.com/urfave/cli/v2"
 )
 
 type (
@@ -20,6 +21,7 @@ type (
 		username string
 		password string
 		sarufi   *sarufi.Client
+		cli      *cli.App
 	}
 
 	// Credentials
