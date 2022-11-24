@@ -97,7 +97,6 @@ func (c *Client) ChatbotCreate(ctx context.Context, request *ChatbotCreateReq) (
 // will be unmarshalled add returns an error
 func parseResponse(response *http.Response, v any) error {
 	statusCode := response.StatusCode
-	defer response.Body.Close()
 	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return fmt.Errorf("parse response: %w", err)

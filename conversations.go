@@ -1,7 +1,6 @@
 package sarufi
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -41,7 +40,7 @@ func makeConversation(ctx context.Context, client *http.Client, reqURL, method s
 		"Content-Type":  "application/json",
 		"Authorization": fmt.Sprint("Bearer %s", req.Token),
 	}
-	request, err := createRequest(ctx, method, reqURL, bytes.NewBuffer(reqBody), headers)
+	request, err := createRequest(ctx, method, reqURL, req, headers)
 	if err != nil {
 		return nil, fmt.Errorf("make conversation: %w", err)
 	}
