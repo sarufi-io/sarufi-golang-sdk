@@ -11,6 +11,8 @@ import (
 	"github.com/tidwall/pretty"
 )
 
+// GetBot() method to get a specific bot.
+// It accepts the bot id (type int) as a parameter.
 func (bot *Bot) GetBot(id int) *Bot {
 	infoLog.Printf("Getting bot with id: %d", id)
 	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, id)
@@ -49,6 +51,8 @@ func (bot *Bot) GetBot(id int) *Bot {
 
 }
 
+// GetBots() get a json response of all available bots and
+// their details.
 func (bot *Bot) GetBots() {
 	infoLog.Print("Getting bots")
 	url := bot.baseURL + "chatbots"
@@ -80,6 +84,10 @@ func (bot *Bot) GetBots() {
 
 }
 
+// CreateBot method to create a new bot. It accepts the parameters of
+// type string; Name - which is the name of the bot, Description - which
+// is the description of the bot and Industry - which is the related 
+// industry of the bot.
 func (bot *Bot) CreateBot(name, description, industry string) *Bot {
 	if bot.token == "" {
 		errorLog.Fatal("Initialize the bot first!")
@@ -139,6 +147,8 @@ func (bot *Bot) CreateBot(name, description, industry string) *Bot {
 	return bot
 }
 
+// UpdateBot() method to update contents on the bot. Used by other methods.
+// User has the liberty to update manually too.
 func (bot *Bot) UpdateBot() *Bot {
 
 	if bot.Id == 0 {
@@ -192,6 +202,7 @@ func (bot *Bot) UpdateBot() *Bot {
 
 }
 
+// DeleteBot() method to delete the currently selected bot.
 func (bot *Bot) DeleteBot() {
 	if bot.Id == 0 {
 		errorLog.Fatal("Cannot delete a non existing bot")
