@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 type (
@@ -134,37 +135,26 @@ func chatbotCreate(ctx context.Context, client *http.Client, url, method string,
 	if err != nil {
 		return nil, fmt.Errorf("chatbot create: %w", err)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, url, bytes.NewBuffer(reqBody))
+	req, err := createRequest(ctx, method, url, bytes.NewBuffer(reqBody),
+		map[string]string{
+			"Content-Type": "application/json",
+		})
 	if err != nil {
 		return nil, fmt.Errorf("chatbot create: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("chatbot create: %w", err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusBadRequest {
-		var errResp RequestError
-		err = json.NewDecoder(resp.Body).Decode(&errResp)
-		if err != nil {
-			return nil, fmt.Errorf("chatbot create: %w", err)
-		}
-		return nil, fmt.Errorf("chatbot create: %s", errResp.Detail)
-	} else if resp.StatusCode == http.StatusOK {
-		var respBody Chatbot
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		if err != nil {
-			return nil, fmt.Errorf("chatbot create: %w", err)
-		}
-		return &respBody, nil
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return nil, fmt.Errorf("register: read response body: %w", err)
-		}
-		return nil, fmt.Errorf("chatbot create: %s", responseBody.String())
+	var response Chatbot
+	err = parseResponse(resp, &response)
+	if err != nil {
+		return nil, fmt.Errorf("create chatbot: %w", err)
 	}
+	return &response, nil
 }
 
 // getChatBot gets a chatbot. It returns a Chatbot in case the request is successful
@@ -174,75 +164,50 @@ func getChatbot(ctx context.Context, client *http.Client, reqURL, method string,
 	if err != nil {
 		return nil, fmt.Errorf("get chatbot: %w", err)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, getChatbotURL, nil)
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": fmt.Sprintf("Bearer %s", request.Token)}
+	req, err := createRequest(ctx, method, getChatbotURL, nil, headers)
 	if err != nil {
 		return nil, fmt.Errorf("get chatbot: %w", err)
 	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", request.Token))
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("get chatbot: %w", err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		var respBody Chatbot
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		if err != nil {
-			return nil, fmt.Errorf("get chatbot: %w", err)
-		}
-		return &respBody, nil
-	} else if resp.StatusCode == 400 {
-		var errResp RequestError
-		err = json.NewDecoder(resp.Body).Decode(&errResp)
-		if err != nil {
-			return nil, fmt.Errorf("get chatbot: %w", err)
-		}
-		return nil, fmt.Errorf("get chatbot: %s", errResp.Detail)
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return nil, fmt.Errorf("get chatbot: read response body: %w", err)
-		}
-		return nil, fmt.Errorf("get chatbot: %s", responseBody.String())
+	var response Chatbot
+	err = parseResponse(resp, &response)
+	if err != nil {
+		return nil, fmt.Errorf("get chatbot: %w", err)
 	}
+	return &response, nil
 }
 
 func listChatBots(ctx context.Context, client *http.Client, reqURL, method, token string) ([]*Chatbot, error) {
-	req, err := http.NewRequestWithContext(ctx, method, reqURL, nil)
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": fmt.Sprintf("Bearer %s", token)}
+	req, err := createRequest(ctx, method, reqURL, nil, headers)
+	if err != nil {
+		return nil, fmt.Errorf("list chatbots: %w", err)
+	}
+	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("list chatbots: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	resp, err := client.Do(req)
+	var response []*Chatbot
+	err = parseResponse(resp, &response)
 	if err != nil {
 		return nil, fmt.Errorf("list chatbots: %w", err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		var respBody []*Chatbot
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		if err != nil {
-			return nil, fmt.Errorf("list chatbots: %w", err)
-		}
-		return respBody, nil
-	} else if resp.StatusCode == 400 {
-		var errResp RequestError
-		err = json.NewDecoder(resp.Body).Decode(&errResp)
-		if err != nil {
-			return nil, fmt.Errorf("list chatbots: %w", err)
-		}
-		return nil, fmt.Errorf("list chatbots: %s", errResp.Detail)
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return nil, fmt.Errorf("list chatbots: read response body: %w", err)
-		}
-		return nil, fmt.Errorf("list chatbots: %s", responseBody.String())
-	}
+	return response, nil
 }
 
 // updateChatbot updates a chatbot. It returns a Chatbot in case the request is successful
@@ -252,42 +217,26 @@ func updateChatbot(ctx context.Context, client *http.Client, reqURL, method stri
 	if err != nil {
 		return nil, fmt.Errorf("update chatbot: %w", err)
 	}
-	reqBody, err := json.Marshal(request)
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": fmt.Sprintf("Bearer %s", request.Token)}
+	req, err := createRequest(ctx, method, updateChatbotURL, request, headers)
 	if err != nil {
 		return nil, fmt.Errorf("update chatbot: %w", err)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, updateChatbotURL, bytes.NewBuffer(reqBody))
-	if err != nil {
-		return nil, fmt.Errorf("update chatbot: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", request.Token))
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return nil, fmt.Errorf("update chatbot: %w", err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		var respBody Chatbot
-		err = json.NewDecoder(resp.Body).Decode(&respBody)
-		if err != nil {
-			return nil, fmt.Errorf("update chatbot: %w", err)
-		}
-		return &respBody, nil
-	} else if resp.StatusCode == 400 {
-		var errResp RequestError
-		err = json.NewDecoder(resp.Body).Decode(&errResp)
-		if err != nil {
-			return nil, fmt.Errorf("update chatbot: %w", err)
-		}
-		return nil, fmt.Errorf("update chatbot: %s", errResp.Detail)
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return nil, fmt.Errorf("update chatbot: read response body: %w", err)
-		}
-		return nil, fmt.Errorf("update chatbot: %s", responseBody.String())
+	var respBody Chatbot
+	err = parseResponse(resp, &respBody)
+	if err != nil {
+		return nil, fmt.Errorf("update chatbot: %w", err)
 	}
+	return &respBody, nil
 }
 
 // deleteChatbot deletes a chatbot. It returns a Chatbot in case the request is successful
@@ -297,31 +246,56 @@ func deleteChatbot(ctx context.Context, client *http.Client, reqURL, method stri
 	if err != nil {
 		return fmt.Errorf("delete chatbot: %w", err)
 	}
-	req, err := http.NewRequestWithContext(ctx, method, deleteChatbotURL, nil)
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": fmt.Sprintf("Bearer %s", request.Token)}
+	req, err := createRequest(ctx, method, deleteChatbotURL, nil, headers)
 	if err != nil {
 		return fmt.Errorf("delete chatbot: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", request.Token))
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("delete chatbot: %w", err)
 	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		return nil
-	} else if resp.StatusCode == 400 {
-		var errResp RequestError
-		err = json.NewDecoder(resp.Body).Decode(&errResp)
-		if err != nil {
-			return fmt.Errorf("delete chatbot: %w", err)
-		}
-		return fmt.Errorf("delete chatbot: %s", errResp.Detail)
-	} else {
-		var responseBody bytes.Buffer
-		if _, err := responseBody.ReadFrom(resp.Body); err != nil {
-			return fmt.Errorf("delete chatbot: read response body: %w", err)
-		}
-		return fmt.Errorf("delete chatbot: %s", responseBody.String())
+
+	if resp != nil {
+		defer resp.Body.Close()
 	}
+	return parseResponse(resp, nil)
+}
+
+// LoadConversationFlow loads a conversation flows from a json file that will be used to train the bot model
+// It returns a []*Flow in case the request is successful. The file content should be in
+// JSON format.
+func LoadConversationFlow(path string) ([]*Flow, error) {
+	f, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("load conversation flow: %w", err)
+	}
+
+	var flows []*Flow
+	err = json.Unmarshal(f, &flows)
+	if err != nil {
+		return nil, fmt.Errorf("load conversation flow: %w", err)
+	}
+
+	return flows, nil
+}
+
+// LoadIntents loads intents from a file, It is exepected that the file contents are
+// in JSON format.
+func LoadIntents(path string) (Intents, error) {
+	// read all the contents of the file into a byte slice
+	// then unmarshal the byte slice into a Intents struct
+	// and return the Intents struct
+	dataBytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("load intents: %w", err)
+	}
+	var intents Intents
+	err = json.Unmarshal(dataBytes, &intents)
+	if err != nil {
+		return nil, fmt.Errorf("load intents: %w", err)
+	}
+	return intents, nil
 }
