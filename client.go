@@ -26,6 +26,21 @@ type (
 	ClientOption func(*Client)
 )
 
+// SetLogger sets the logger for the client
+func (c *Client) SetLogger(logger io.Writer) {
+	c.logger = logger
+}
+
+// SetDebug sets the debug flag for the client
+func (c *Client) SetDebug(debug bool) {
+	c.debug = debug
+}
+
+// SetHttpClient sets the logger for the client
+func (c *Client) SetHttpClient(http *http.Client) {
+	c.http = http
+}
+
 // WithHttpClient sets the http client for the client
 func WithHttpClient(http *http.Client) ClientOption {
 	return func(c *Client) {
