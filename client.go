@@ -24,6 +24,9 @@ type (
 	}
 
 	ClientOption func(*Client)
+
+	RegisterFunc func(ctx context.Context, request *RegisterRequest) (*RegisterResponse, error)
+	LoginFunc    func(ctx context.Context, request *LoginRequest) (*LoginResponse, error)
 )
 
 // SetLogger sets the logger for the client

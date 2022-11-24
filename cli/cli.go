@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -11,6 +12,8 @@ import (
 )
 
 type (
+	Commander struct {
+	}
 
 	// Manager is the commandline tool to manages bots in sarufi platform
 	Manager struct {
@@ -24,7 +27,6 @@ type (
 		cli      *cli.App
 	}
 
-	// Credentials
 	Credentials struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -43,6 +45,14 @@ func NewManager(credentials *Credentials, opts ...ManagerOption) *Manager {
 		http:     http.DefaultClient,
 		username: credentials.Username,
 		password: credentials.Password,
+		cli: &cli.App{
+			Name:  "sarufi",
+			Usage: "sarufi is a commandline tool to manage bots in sarufi paltform",
+			Action: func(*cli.Context) error {
+				fmt.Println("boom! I say!")
+				return nil
+			},
+		},
 	}
 	for _, opt := range opts {
 		opt(m)
@@ -55,6 +65,41 @@ func NewManager(credentials *Credentials, opts ...ManagerOption) *Manager {
 	)
 	m.sarufi = c
 	return m
+}
+
+// LoginCommand ...
+func LoginCommand(f sarufi.LoginFunc) *cli.Command {
+	return &cli.Command{}
+}
+
+// RegisterCommand returns a cli.Command that is executed during registration
+// of a new user
+// sarufi register --username="johndoe" --password="johndoepassword"
+func RegisterCommand(f sarufi.RegisterFunc) *cli.Command {
+	cmnd := &cli.Command{
+		Name:  "register",
+		Usage: "register a new user to sarufi platform",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "username",
+				Value: "",
+				Usage: "username",
+			},
+			&cli.StringFlag{
+				Name:  "password",
+				Value: "",
+				Usage: "password",
+			},
+		},
+		Action: func(cCtx *cli.Context) error {
+			// retrieve username and password
+
+			fmt.Println("added task: ", cCtx.Args().First())
+			return nil
+		},
+	}
+
+	return cmnd
 }
 
 // SetCredentials sets the credentials for the manager
