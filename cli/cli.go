@@ -47,11 +47,7 @@ func NewManager(credentials *Credentials, opts ...ManagerOption) *Manager {
 		password: credentials.Password,
 		cli: &cli.App{
 			Name:  "sarufi",
-			Usage: "sarufi is a commandline tool to manage bots in sarufi paltform",
-			Action: func(*cli.Context) error {
-				fmt.Println("boom! I say!")
-				return nil
-			},
+			Usage: "sarufi is a commandline tool to manage bots in sarufi platform",
 		},
 	}
 	for _, opt := range opts {
@@ -68,14 +64,45 @@ func NewManager(credentials *Credentials, opts ...ManagerOption) *Manager {
 }
 
 // LoginCommand ...
-func LoginCommand(f sarufi.LoginFunc) *cli.Command {
-	return &cli.Command{}
+func LoginCommand(logger io.Writer, f sarufi.LoginFunc) *cli.Command {
+	return &cli.Command{
+		Name:  "login",
+		Usage: "login to sarufi platform",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "username",
+				Aliases:  []string{"u"},
+				Usage:    "username for sarufi platform",
+				Required: true,
+			},
+			&cli.StringFlag{
+				Name:     "password",
+				Aliases:  []string{"p"},
+				Usage:    "password for sarufi platform",
+				Required: true,
+			},
+		},
+		Action: func(cCtx *cli.Context) error {
+			username := cCtx.String("username")
+			password := cCtx.String("password")
+			response, err := f(cCtx.Context, &sarufi.LoginRequest{
+				Username: username,
+				Password: password,
+			})
+			if err != nil {
+				return err
+			}
+			message := fmt.Sprintf("message: %s\ntoken: %s\n", response.Message, response.Token)
+			logger.Write([]byte(message))
+			return nil
+		},
+	}
 }
 
 // RegisterCommand returns a cli.Command that is executed during registration
 // of a new user
 // sarufi register --username="johndoe" --password="johndoepassword"
-func RegisterCommand(f sarufi.RegisterFunc) *cli.Command {
+func RegisterCommand(logger io.Writer, f sarufi.RegisterFunc) *cli.Command {
 	cmnd := &cli.Command{
 		Name:  "register",
 		Usage: "register a new user to sarufi platform",
@@ -92,9 +119,19 @@ func RegisterCommand(f sarufi.RegisterFunc) *cli.Command {
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
-			// retrieve username and password
+			username := cCtx.String("username")
+			password := cCtx.String("password")
+			response, err := f(cCtx.Context, &sarufi.RegisterRequest{
+				Username: username,
+				Password: password,
+			})
 
-			fmt.Println("added task: ", cCtx.Args().First())
+			if err != nil {
+				return err
+			}
+
+			_, _ = logger.Write([]byte(response.Message))
+
 			return nil
 		},
 	}
@@ -136,5 +173,10 @@ func (m *Manager) SetHttpClient(http *http.Client) {
 
 // Run is the entrypoint for the manager
 func (m *Manager) Run(args []string) error {
-	return nil
+	m.cli.Commands = []*cli.Command{
+		RegisterCommand(m.Logger, m.sarufi.Register),
+		LoginCommand(m.Logger, m.sarufi.Login),
+	}
+
+	return m.cli.Run(args)
 }
