@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	manager := cli.NewManager(&cli.Credentials{
 		Username: "username",
 		Password: "password",

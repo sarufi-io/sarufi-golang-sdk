@@ -12,8 +12,7 @@ import (
 )
 
 type (
-	Commander struct {
-	}
+	Commander struct{}
 
 	// Manager is the commandline tool to manages bots in sarufi platform
 	Manager struct {
@@ -35,6 +34,13 @@ type (
 	// ManagerOption is the option for the manager
 	ManagerOption func(*Manager)
 )
+
+// WithCredentials sets the credentials for the manager
+func WithCredentials(credentials *Credentials) ManagerOption {
+	return func(m *Manager) {
+		m.SetCredentials(credentials)
+	}
+}
 
 // NewManager creates a new manager
 func NewManager(credentials *Credentials, opts ...ManagerOption) *Manager {
@@ -125,7 +131,6 @@ func RegisterCommand(logger io.Writer, f sarufi.RegisterFunc) *cli.Command {
 				Username: username,
 				Password: password,
 			})
-
 			if err != nil {
 				return err
 			}
