@@ -14,14 +14,14 @@ You need to register with [Sarufi](https://docs.sarufi.io/) in order to get your
 
 Simply install with the `go get` command:
 ```
-go get github.com/sarufi-io/sarufi-golang-sdk
+go get github.com/sarufi-io/sarufi-golang-sdk@v0.1.0
 ```
 And import it to your package as:
 ```
 package main
 
 import (
-    sarufi "github.com/sarufi-io/sarufi-golang-sdk"
+    sarufi "github.com/sarufi-io/sarufi-golang-sdk@v0.1.0"
 )
 ```
 
@@ -148,7 +148,7 @@ title := "flowabanga"
 
 // Create a new variable of type Flow
 
-var newFlow bot.Flow
+var newFlow sarufi.Flow
 
 // Fill in the new messages and the next state
 
