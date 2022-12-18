@@ -216,7 +216,7 @@ func (bot *Bot) Respond(message, messageType string) {
 }
 
 // To get the current and next state of the chat. It
-// accepts no parameters. It will display the JSON 
+// accepts no parameters. It will display the JSON
 // response from the API.
 func (bot *Bot) ChatState() {
 	if bot.Id == 0 {
@@ -263,6 +263,10 @@ func (bot *Bot) ChatState() {
 // A helper function to check if a file exists. It
 // accepts a filename string and returns a bool.
 func fileChecker(fileName string) bool {
+
+	if len(fileName) > 50 {
+		return false
+	}
 	_, error := os.Stat(fileName)
 
 	// check if error is "file not exists"
