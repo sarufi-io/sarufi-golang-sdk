@@ -4,56 +4,91 @@ package sarufi
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 )
 
-// Initialize() method to generate a token for the user.
-// It will assign the generated token to Bot.token for
-// all subsequent use.
-func (bot *Bot) Initialize(username, password string) {
-  bot.baseURL = "https://api.sarufi.io/"
-  infoLog.Println("Getting Token...")
-  url := bot.baseURL + "users/login"
-  params := map[string]string{
-    "username": username,
-    "password": password,
-  }
+type Application struct {
+	BaseURL string
+	Token   string
+}
 
-  jsonParams, err := json.Marshal(params)
+// GetToken() method to generate a token for the user.
+// The received token will be saved to Application.Token
+// otherwise it will return an error.
+func (app *Application) GetToken(username, password string) error {
+	app.BaseURL = BaseURL
+	url := app.BaseURL + "users/login"
 
-  if err != nil {
-    errorLog.Fatal(err)
-  }
-  req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonParams))
+	params := map[string]string{
+		"username": username,
+		"password": password,
+	}
 
-  if err != nil {
-    errorLog.Fatal(err)
-  }
+	jsonParams, err := json.Marshal(params)
 
-  req.Header.Set("Content-Type", "application/json")
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonParams))
 
-  client := &http.Client{}
+	if err != nil {
+		return err
+	}
 
-  resp, err := client.Do(req)
-  if err != nil {
-    errorLog.Fatal(err)
-  }
-  defer resp.Body.Close()
+	req.Header.Set("Content-Type", "application/json")
 
-  body, err := io.ReadAll(resp.Body)
+	client := &http.Client{}
 
-  if err != nil {
-    errorLog.Fatal(err)
-  }
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
 
-  var result map[string]string
-  json.Unmarshal([]byte(body), &result)
+	defer resp.Body.Close()
 
-  if result["token"] != "" {
-    bot.token = result["token"]
-  } else {
-    errorLog.Fatal(result["message"])
-  }
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return err
+	}
+
+	switch resp.StatusCode {
+	case 200:
+		var result struct {
+			Message string `json:"message"`
+			Token   string `json:"token"`
+		}
+
+		err := json.Unmarshal([]byte(body), &result)
+
+		if err != nil {
+			return err
+		}
+
+		app.Token = result.Token
+
+		return nil
+
+	case 404:
+		var notFound NotFoundError
+		err := json.Unmarshal([]byte(body), &notFound)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Message)
+
+	case 401:
+		var unauthorized Unauthorized
+		err := json.Unmarshal([]byte(body), &unauthorized)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Message)
+
+	default:
+		return fmt.Errorf(string(body))
+	}
 
 }
