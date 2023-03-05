@@ -4,11 +4,16 @@ import "fmt"
 
 type NotFoundError struct {
 	Message string `json:"message"`
+	Detail  string `json:"detail"`
 }
 
 func (nf *NotFoundError) Error() string {
 	if nf != nil {
-		return fmt.Sprintf("Not Found: %s", nf.Message)
+		if nf.Message != "" {
+			return fmt.Sprintf("Not Found: %s", nf.Message)
+		} else if nf.Detail != "" {
+			return fmt.Sprintf("Not Found: %s", nf.Detail)
+		}
 	}
 	return ""
 }
