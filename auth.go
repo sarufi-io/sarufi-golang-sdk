@@ -77,7 +77,7 @@ func (app *Application) GetToken(username, password string) error {
 		if err != nil {
 			return err
 		}
-		return fmt.Errorf("Error %s", notFound.Message)
+		return fmt.Errorf("Error %s", notFound.Error())
 
 	case 401:
 		var unauthorized Unauthorized
@@ -85,7 +85,7 @@ func (app *Application) GetToken(username, password string) error {
 		if err != nil {
 			return err
 		}
-		return fmt.Errorf("Error %s", unauthorized.Message)
+		return fmt.Errorf("Error %s", unauthorized.Error())
 
 	default:
 		return fmt.Errorf(string(body))
