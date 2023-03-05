@@ -4,250 +4,198 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-
-	"github.com/google/uuid"
-	"github.com/tidwall/pretty"
 )
 
 // GetBot() method to get a specific bot.
 // It accepts the bot id (type int) as a parameter.
-func (bot *Bot) GetBot(id int) *Bot {
-	infoLog.Printf("Getting bot with id: %d", id)
-	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, id)
-	req, err := http.NewRequest("GET", url, nil)
+// Returns a pointer of type Bot and an error.
+func (app *Application) GetBot(id int) (*Bot, error) {
+	if !checkToken(app.Token) {
+		return nil, fmt.Errorf("Error: No token available")
+	}
+	url := fmt.Sprintf("%schatbot/%d", app.BaseURL, id)
 
+	statusCode, body, err := app.makeRequest("GET", url, nil)
 	if err != nil {
-		errorLog.Fatal(err)
+		return nil, err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", bot.token)
-	req.Header.Set("Authorization", bearer)
+	switch statusCode {
+	case 200:
+		var bot *Bot
+		if err := json.Unmarshal(body, &bot); err != nil {
+			return nil, err
+		}
+		// chatID := uuid.New()
+		// bot.chatID = chatID.String()
+		return bot, nil
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("Error %s", notFound.Error())
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("Error %s", unauthorized.Error())
+	default:
+		return nil, fmt.Errorf(string(body))
+	}
+}
 
-	client := &http.Client{}
+// GetBots() method returns a list of type Bot and an error
+func (app *Application) GetBots() ([]Bot, error) {
+	if !checkToken(app.Token) {
+		return nil, fmt.Errorf("Error: No token available")
+	}
 
-	resp, err := client.Do(req)
+	url := app.BaseURL + "chatbots"
+
+	statusCode, body, err := app.makeRequest("GET", url, nil)
 	if err != nil {
-		errorLog.Fatal(err)
+		return nil, err
 	}
-	defer resp.Body.Close()
+	switch statusCode {
+	case 200:
+		var bots []Bot
+		if err := json.Unmarshal(body, &bots); err != nil {
+			return nil, err
+		}
+		return bots, nil
 
-	body, err := io.ReadAll(resp.Body)
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("Error %s", unauthorized.Error())
 
-	if err != nil {
-		errorLog.Fatal(err)
+	default:
+		return nil, fmt.Errorf(string(body))
 	}
-
-	//	infoLog.Println(string(pretty.Pretty(body)))
-	if err := json.Unmarshal(body, &bot); err != nil {
-		errorLog.Fatal("Cannot Unmarshal JSON response.")
-	}
-	chatID := uuid.New()
-	bot.chatID = chatID.String()
-	infoLog.Printf("Fetched bot with id: %d", id)
-	return bot
 
 }
 
-// GetBots() get a json response of all available bots and
-// their details.
-func (bot *Bot) GetBots() {
-	infoLog.Print("Getting bots")
-	url := bot.baseURL + "chatbots"
-	req, err := http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		errorLog.Fatal(err)
+// CreateBot method to create a new bot. It accepts the following parameters:
+// Name (type string) - which is the name of the bot
+// Description (type string)- which is the description of the bot
+// Industry (type string) - which is the related industry of the bot
+// Visible (type bool) - allow it to be publicly available
+// It returns a pointer to a new Bot and an error
+func (app *Application) CreateBot(name, description, industry string, visible bool) (*Bot, error) {
+	if !checkToken(app.Token) {
+		return nil, fmt.Errorf("Error: No token available")
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", bot.token)
-	req.Header.Set("Authorization", bearer)
+	url := app.BaseURL + "chatbot"
 
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-
-	infoLog.Println(string(pretty.Pretty(body)))
-
-}
-
-// CreateBot method to create a new bot. It accepts the parameters of
-// type string; Name - which is the name of the bot, Description - which
-// is the description of the bot and Industry - which is the related 
-// industry of the bot.
-func (bot *Bot) CreateBot(name, description, industry string) *Bot {
-	if bot.token == "" {
-		errorLog.Fatal("Initialize the bot first!")
-	}
-
-	bot.Name = name
-	bot.Description = description
-	bot.Industry = industry
-	infoLog.Print("Creating new bot...")
-	url := bot.baseURL + "chatbot"
 	params := map[string]interface{}{
-		"name":                 bot.Name,
-		"description":          bot.Description,
-		"industry":             bot.Industry,
-		"visible_on_community": bot.VisibleOnCommunity,
+		"name":                 name,
+		"description":          description,
+		"industry":             industry,
+		"visible_on_community": visible,
 	}
 
 	jsonParams, err := json.Marshal(params)
-
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonParams))
-
 	if err != nil {
 		errorLog.Fatal(err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", bot.token)
-	req.Header.Set("Authorization", bearer)
+	statusCode, body, err := app.makeRequest("POST", url, bytes.NewBuffer(jsonParams))
 
-	client := &http.Client{}
+	switch statusCode {
+	case 200:
+		var bot *Bot
+		if err := json.Unmarshal(body, &bot); err != nil {
+			return nil, err
+		}
+		return bot, nil
 
-	resp, err := client.Do(req)
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-	defer resp.Body.Close()
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("Error %s", unauthorized.Error())
 
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		errorLog.Fatal(err)
+	default:
+		return nil, fmt.Errorf(string(body))
 	}
-	// infoLog.Println(string(pretty.Pretty(body)))
-	if err := json.Unmarshal(body, &bot); err != nil {
-		errorLog.Fatal("Cannot Unmarshal JSON response.")
-	}
-	chatID := uuid.New()
-	bot.chatID = chatID.String()
-	if resp.StatusCode == 200 {
-		infoLog.Println("Bot created successfully")
-	} else {
-		errorLog.Fatal(string(pretty.Pretty(body)))
-	}
-	return bot
 }
 
-// UpdateBot() method to update contents on the bot. Used by other methods.
-// User has the liberty to update manually too.
-func (bot *Bot) UpdateBot() *Bot {
-
-	if bot.Id == 0 {
-		errorLog.Fatal("Cannot update a non existing bot")
-	}
-	infoLog.Print("Updating bot...")
-
-	params := map[string]interface{}{
-		"name":                 bot.Name,
-		"description":          bot.Description,
-		"industry":             bot.Industry,
-		"visible_on_community": bot.VisibleOnCommunity,
-		"intents":              bot.Intents,
-		"flows":                bot.Flows,
+// UpdateBot() method to update the bot. It accepts a parameter of
+// type *Bot and will return  an error if any
+func (app *Application) UpdateBot(bot *Bot) error {
+	if !checkToken(app.Token) {
+		return fmt.Errorf("Error: No token available")
 	}
 
-	jsonParams, err := json.Marshal(params)
+	jsonParams, err := json.Marshal(bot)
 
 	if err != nil {
-		errorLog.Fatal(err)
+		return err
 	}
-	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, bot.Id)
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonParams))
-
+	url := fmt.Sprintf("%schatbot/%d", app.BaseURL, bot.Id)
+	statusCode, body, err := app.makeRequest("PUT", url, bytes.NewBuffer(jsonParams))
 	if err != nil {
-		errorLog.Fatal(err)
+		return err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", bot.token)
-	req.Header.Set("Authorization", bearer)
+	switch statusCode {
+	case 200:
+		if err := json.Unmarshal(body, &bot); err != nil {
+			return err
+		}
+		return nil
 
-	client := &http.Client{}
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
 
-	resp, err := client.Do(req)
-	if err != nil {
-		errorLog.Fatal(err)
+	default:
+		return fmt.Errorf(string(body))
 	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-	if resp.StatusCode != 200 {
-		// infoLog.Println("Bot updated successfully")
-		infoLog.Println(string(pretty.Pretty(body)))
-	}
-	return bot
 
 }
 
-// DeleteBot() method to delete the currently selected bot.
-func (bot *Bot) DeleteBot() {
-	if bot.Id == 0 {
-		errorLog.Fatal("Cannot delete a non existing bot")
+// DeleteBot() will delete the bot of with provided ID.
+// It will return an error if deletion was unsuccessful
+func (app *Application) DeleteBot(id int) error {
+	if !checkToken(app.Token) {
+		return fmt.Errorf("Error: No token available")
 	}
-	infoLog.Printf("Deleting bot with id: %d", bot.Id)
-	url := fmt.Sprintf("%schatbot/%d", bot.baseURL, bot.Id)
-	req, err := http.NewRequest("DELETE", url, nil)
 
+	url := fmt.Sprintf("%schatbot/%d", app.BaseURL, id)
+	statusCode, body, err := app.makeRequest("DELETE", url, nil)
 	if err != nil {
-		errorLog.Fatal(err)
+		return err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", bot.token)
-	req.Header.Set("Authorization", bearer)
+	switch statusCode {
+	case 200:
+		return nil
 
-	client := &http.Client{}
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
 
-	resp, err := client.Do(req)
-	if err != nil {
-		errorLog.Fatal(err)
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+
+	default:
+		return fmt.Errorf(string(body))
 	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		errorLog.Fatal(err)
-	}
-	if resp.StatusCode != 200 {
-
-		errorLog.Fatal(string(pretty.Pretty(body)))
-	}
-	bot.Id = 0
-	bot.chatID = ""
-	bot.Description = ""
-	bot.Industry = ""
-	bot.Name = ""
-
-	for k := range bot.Intents {
-		delete(bot.Intents, k)
-	}
-	for k := range bot.Flows {
-		delete(bot.Flows, k)
-	}
-
-	infoLog.Println("Bot deleted successfully")
 }
