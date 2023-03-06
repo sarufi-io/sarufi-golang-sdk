@@ -1,16 +1,16 @@
 package sarufi
 
 import (
-	"log"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"time"
 )
 
-const BaseURL = "https://api.sarufi.io/"
+const baseURL = "https://api.sarufi.io/"
 
-// For Error and Information Loggings
-var infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-var errorLog = log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime)
+var token = ""
 
 // A helper function to check if a file exists. It
 // accepts a filename string and returns a bool.
@@ -36,6 +36,37 @@ func checkToken(token string) bool {
 	return false
 }
 
+// A helper function to make requests easier
+func makeRequest(method, url string, data io.Reader) (int, []byte, error) {
+	req, err := http.NewRequest(method, url, data)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	bearer := fmt.Sprintf("Bearer %s", token)
+	req.Header.Set("Authorization", bearer)
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return 0, nil, err
+	}
+
+	return resp.StatusCode, body, nil
+}
+
+// ToDo;
+// Make custom way of parsing time
 type CustomTime struct {
 	time.Time
 }
