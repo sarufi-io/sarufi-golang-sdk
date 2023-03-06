@@ -9,17 +9,11 @@ import (
 	"net/http"
 )
 
-type Application struct {
-	BaseURL string
-	Token   string
-}
-
 // GetToken() method to generate a token for the user.
 // The received token will be saved to Application.Token
 // otherwise it will return an error.
 func (app *Application) GetToken(username, password string) error {
-	app.BaseURL = BaseURL
-	url := app.BaseURL + "users/login"
+	url := baseURL + "users/login"
 
 	params := map[string]string{
 		"username": username,
@@ -60,25 +54,12 @@ func (app *Application) GetToken(username, password string) error {
 			Message string `json:"message"`
 			Token   string `json:"token"`
 		}
-
 		err := json.Unmarshal([]byte(body), &result)
-
 		if err != nil {
 			return err
 		}
-
-		app.Token = result.Token
-
+		token = result.Token
 		return nil
-
-	case 404:
-		var notFound NotFoundError
-		err := json.Unmarshal([]byte(body), &notFound)
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("Error %s", notFound.Error())
-
 	case 401:
 		var unauthorized Unauthorized
 		err := json.Unmarshal([]byte(body), &unauthorized)
@@ -86,9 +67,22 @@ func (app *Application) GetToken(username, password string) error {
 			return err
 		}
 		return fmt.Errorf("Error %s", unauthorized.Error())
-
+	case 404:
+		var notFound NotFoundError
+		err := json.Unmarshal([]byte(body), &notFound)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+	case 422:
+		var unprocessableEntity *UnprocessableEntity
+		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+	case 500:
+		return fmt.Errorf("Error status code 500: Internal Server Error")
 	default:
 		return fmt.Errorf(string(body))
 	}
-
 }
