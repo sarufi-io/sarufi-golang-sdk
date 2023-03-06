@@ -119,7 +119,7 @@ func (app *Application) CreateBot(name, description, industry string, visible bo
 
 	jsonParams, err := json.Marshal(params)
 	if err != nil {
-		errorLog.Fatal(err)
+		return nil, err
 	}
 
 	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
