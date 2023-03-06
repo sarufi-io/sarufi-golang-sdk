@@ -7,7 +7,7 @@ import (
 )
 
 // A helper function to make requests easier
-func (app *Application) makeRequest(method, url string, data io.Reader) (int, []byte, error) {
+func makeRequest(method, url string, data io.Reader) (int, []byte, error) {
 	req, err := http.NewRequest(method, url, data)
 
 	if err != nil {
@@ -15,7 +15,7 @@ func (app *Application) makeRequest(method, url string, data io.Reader) (int, []
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	bearer := fmt.Sprintf("Bearer %s", app.Token)
+	bearer := fmt.Sprintf("Bearer %s", token)
 	req.Header.Set("Authorization", bearer)
 
 	client := &http.Client{}
