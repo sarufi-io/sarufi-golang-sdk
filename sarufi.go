@@ -15,7 +15,7 @@ func (app *Application) GetBot(id int) (*Bot, error) {
 	}
 	url := fmt.Sprintf("%schatbot/%d", app.BaseURL, id)
 
-	statusCode, body, err := app.makeRequest("GET", url, nil)
+	statusCode, body, err := makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (app *Application) GetBots() ([]Bot, error) {
 
 	url := app.BaseURL + "chatbots"
 
-	statusCode, body, err := app.makeRequest("GET", url, nil)
+	statusCode, body, err := makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (app *Application) CreateBot(name, description, industry string, visible bo
 		errorLog.Fatal(err)
 	}
 
-	statusCode, body, err := app.makeRequest("POST", url, bytes.NewBuffer(jsonParams))
+	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
 
 	switch statusCode {
 	case 200:
@@ -139,7 +139,7 @@ func (app *Application) UpdateBot(bot *Bot) error {
 		return err
 	}
 	url := fmt.Sprintf("%schatbot/%d", app.BaseURL, bot.Id)
-	statusCode, body, err := app.makeRequest("PUT", url, bytes.NewBuffer(jsonParams))
+	statusCode, body, err := makeRequest("PUT", url, bytes.NewBuffer(jsonParams))
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (app *Application) DeleteBot(id int) error {
 	}
 
 	url := fmt.Sprintf("%schatbot/%d", app.BaseURL, id)
-	statusCode, body, err := app.makeRequest("DELETE", url, nil)
+	statusCode, body, err := makeRequest("DELETE", url, nil)
 	if err != nil {
 		return err
 	}
