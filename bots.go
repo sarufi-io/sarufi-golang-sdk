@@ -1,39 +1,13 @@
 package sarufi
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+
+	"github.com/google/uuid"
 )
-
-// Type Flow to create a new Flow XD.
-// Message is a slice of strings.
-// NextState is simply a string.
-type Flow struct {
-	Message   []string `json:"message"`
-	NextState string   `json:"next_state"`
-}
-
-// Type Flows to map a string to the type Flow.
-type Flows map[string]Flow
-
-// Type Bot. All the fields are matched to the API
-// JSON response.
-type Bot struct {
-	Id                 int                 `json:"id"`
-	UserID             int                 `json:"user_id"`
-	Username           string              `json:"user_name"`
-	Name               string              `json:"name"`
-	Industry           string              `json:"industry"`
-	Description        string              `json:"description"`
-	VisibleOnCommunity bool                `json:"visible_on_community"`
-	Intents            map[string][]string `json:"intents"`
-	Flows              Flows               `json:"flows"`
-	ModelName          string              `json:"model_name"`
-	CreatedAt          string              `json:"created_at"`
-	UpdatedAt          string              `json:"updated_at"`
-	chatID             string
-}
 
 // CreateIntents method to create a new intent.
 // It accepts a string that contains the intents
@@ -104,7 +78,6 @@ func (bot *Bot) CreateFlows(flows string) error {
 		return fmt.Errorf("No boy exists")
 	}
 	if fileChecker(flows) {
-		infoLog.Println("Creating flows from file...")
 		newFlows, err := ioutil.ReadFile(flows)
 		if err != nil {
 			return err
@@ -153,98 +126,258 @@ func (bot *Bot) DeleteFlow(title string) error {
 	return nil
 }
 
-// To get bot responses from the API. It accepts message
-// which should be a string. And a messageType which should
-// also be a string.
-// func (bot *Bot) Respond(message, messageType string) error {
-// 	if bot.Id == 0 {
-// 		return fmt.Errorf("No boy exists")
-// 	}
-// 	url := BaseURL + "conversation/"
-//
-// 	params := map[string]interface{}{
-// 		"chat_id":      bot.chatID,
-// 		"bot_id":       bot.Id,
-// 		"message":      message,
-// 		"message_type": messageType,
-// 		"channel":      "general",
-// 	}
-//
-// 	jsonParams, err := json.Marshal(params)
-//
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-// 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonParams))
-//
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-//
-// 	req.Header.Set("Content-Type", "application/json")
-// 	bearer := fmt.Sprintf("Bearer %s", bot.token)
-// 	req.Header.Set("Authorization", bearer)
-//
-// 	client := &http.Client{}
-//
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-// 	defer resp.Body.Close()
-//
-// 	body, err := io.ReadAll(resp.Body)
-//
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-// 	infoLog.Println(string(body))
-// 	return nil
-//
-// }
-//
-// // To get the current and next state of the chat. It
-// // accepts no parameters. It will display the JSON
-// // response from the API.
-// func (bot *Bot) ChatState() error {
-// 	if bot.Id == 0 {
-// 		errorLog.Fatal("No bot exists")
-// 	}
-// 	infoLog.Print("Checking state...")
-// 	url := bot.baseURL + "conversation/allchannels/status"
-// 	params := map[string]interface{}{
-// 		"chat_id": bot.chatID,
-// 		"bot_id":  bot.Id,
-// 	}
-//
-// 	jsonParams, err := json.Marshal(params)
-//
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-// 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonParams))
-//
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-//
-// 	req.Header.Set("Content-Type", "application/json")
-// 	bearer := fmt.Sprintf("Bearer %s", bot.token)
-// 	req.Header.Set("Authorization", bearer)
-//
-// 	client := &http.Client{}
-//
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-// 	defer resp.Body.Close()
-//
-// 	body, err := io.ReadAll(resp.Body)
-//
-// 	if err != nil {
-// 		errorLog.Fatal(err)
-// 	}
-// 	infoLog.Println(string(body))
-// 	return nil
-// }
+// To get bot responses from the API. It accepts a message to
+// responded to and a channel. The default channel is 'general'
+// See: https://neurotech-africa.stoplight.io/docs/sarufi/4a3ab3e807c34-handle-conversation
+func (bot *Bot) Respond(message, channel string) error {
+	if bot.Id == 0 {
+		return fmt.Errorf("No boy exists")
+	}
+	url := baseURL + "conversation/"
+
+	if bot.ChatID == "" {
+		bot.ChatID = uuid.New().String()
+	}
+
+	params := map[string]interface{}{
+		"chat_id":      bot.ChatID,
+		"bot_id":       bot.Id,
+		"message":      message,
+		"message_type": "text",
+		"channel":      channel,
+	}
+
+	jsonParams, err := json.Marshal(params)
+
+	if err != nil {
+		return err
+	}
+	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
+
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+	switch statusCode {
+	case 200:
+		if err := json.Unmarshal(body, &bot.Conversation); err != nil {
+			return err
+		}
+		return nil
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+	case 422:
+		var unprocessableEntity *UnprocessableEntity
+		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+	case 500:
+		return fmt.Errorf("Error status code 500: Internal Server Error")
+	default:
+		return fmt.Errorf(string(body))
+	}
+}
+
+// To get the current and next state of the chat. It
+// accepts no parameters. It will display the JSON
+// response from the API.
+func (bot *Bot) ChatStatus() error {
+	if bot.Id == 0 {
+		errorLog.Fatal("No bot exists")
+	}
+	url := baseURL + "conversation/status"
+	params := map[string]interface{}{
+		"chat_id": bot.ChatID,
+		"bot_id":  bot.Id,
+	}
+
+	jsonParams, err := json.Marshal(params)
+
+	if err != nil {
+		return nil
+	}
+	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
+
+	if err != nil {
+		return nil
+	}
+	switch statusCode {
+	case 200:
+		if err := json.Unmarshal(body, &bot.Conversation); err != nil {
+			return err
+		}
+		return nil
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+	case 422:
+		var unprocessableEntity *UnprocessableEntity
+		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+	case 500:
+		return fmt.Errorf("Error status code 500: Internal Server Error")
+	default:
+		return fmt.Errorf(string(body))
+	}
+}
+
+// A method to predict the intent of a particular message. It will return
+// an error if any. The result will be stored at the bot.Prediction field.
+func (bot *Bot) Predict(message string) error {
+	if bot.Id == 0 {
+		errorLog.Fatal("No bot exists")
+	}
+	bot.Prediction.Message = message
+	url := baseURL + "predict/intent"
+	params := map[string]interface{}{
+		"message": bot.Prediction.Message,
+		"bot_id":  bot.Id,
+	}
+
+	jsonParams, err := json.Marshal(params)
+
+	if err != nil {
+		return nil
+	}
+	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
+
+	if err != nil {
+		return nil
+	}
+	switch statusCode {
+	case 200:
+		if err := json.Unmarshal(body, &bot.Prediction); err != nil {
+			return err
+		}
+		return nil
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+	case 422:
+		var unprocessableEntity *UnprocessableEntity
+		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+	case 500:
+		return fmt.Errorf("Error status code 500: Internal Server Error")
+	default:
+		return fmt.Errorf(string(body))
+	}
+}
+
+// A method to get all users communicating with the bot.
+// A list of chat users will be stored at bot.ChatUsers field.
+func (bot *Bot) GetChatUsers() error {
+	if bot.Id == 0 {
+		errorLog.Fatal("No bot exists")
+	}
+	url := fmt.Sprintf("%schatbot/%d/users", baseURL, bot.Id)
+	statusCode, body, err := makeRequest("GET", url, nil)
+
+	if err != nil {
+		return nil
+	}
+	switch statusCode {
+	case 200:
+		if err := json.Unmarshal(body, &bot.ChatUsers); err != nil {
+			return err
+		}
+		return nil
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+	case 422:
+		var unprocessableEntity *UnprocessableEntity
+		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+	case 500:
+		return fmt.Errorf("Error status code 500: Internal Server Error")
+	default:
+		return fmt.Errorf(string(body))
+	}
+}
+
+// Get conversation history of a particular ChatID. The result
+// will be stored at the bot.ConversationHistory.
+func (bot *Bot) GetChatHistory(chatID string) error {
+	if bot.Id == 0 {
+		errorLog.Fatal("No bot exists")
+	}
+	url := fmt.Sprintf("%sconversation/history/%d/%s", baseURL, bot.Id, chatID)
+	statusCode, body, err := makeRequest("GET", url, nil)
+
+	if err != nil {
+		return nil
+	}
+	switch statusCode {
+	case 200:
+		if err := json.Unmarshal(body, &bot); err != nil {
+			return err
+		}
+		return nil
+	case 401:
+		var unauthorized Unauthorized
+		if err := json.Unmarshal(body, &unauthorized); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unauthorized.Error())
+	case 404:
+		var notFound NotFoundError
+		if err := json.Unmarshal(body, &notFound); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", notFound.Error())
+	case 422:
+		var unprocessableEntity *UnprocessableEntity
+		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
+			return err
+		}
+		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+	case 500:
+		return fmt.Errorf("Error status code 500: Internal Server Error")
+	default:
+		return fmt.Errorf(string(body))
+	}
+}
