@@ -155,7 +155,7 @@ func (bot *Bot) Respond(message, channel string) error {
 	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
 
 	if err != nil {
-		errorLog.Fatal(err)
+		return err
 	}
 	switch statusCode {
 	case 200:
@@ -193,7 +193,7 @@ func (bot *Bot) Respond(message, channel string) error {
 // response from the API.
 func (bot *Bot) ChatStatus() error {
 	if bot.Id == 0 {
-		errorLog.Fatal("No bot exists")
+		return fmt.Errorf("No bot exists")
 	}
 	url := baseURL + "conversation/status"
 	params := map[string]interface{}{
@@ -246,7 +246,7 @@ func (bot *Bot) ChatStatus() error {
 // an error if any. The result will be stored at the bot.Prediction field.
 func (bot *Bot) Predict(message string) error {
 	if bot.Id == 0 {
-		errorLog.Fatal("No bot exists")
+		return fmt.Errorf("No bot exists")
 	}
 	bot.Prediction.Message = message
 	url := baseURL + "predict/intent"
@@ -300,7 +300,7 @@ func (bot *Bot) Predict(message string) error {
 // A list of chat users will be stored at bot.ChatUsers field.
 func (bot *Bot) GetChatUsers() error {
 	if bot.Id == 0 {
-		errorLog.Fatal("No bot exists")
+		return fmt.Errorf("No bot exists")
 	}
 	url := fmt.Sprintf("%schatbot/%d/users", baseURL, bot.Id)
 	statusCode, body, err := makeRequest("GET", url, nil)
@@ -343,7 +343,7 @@ func (bot *Bot) GetChatUsers() error {
 // will be stored at the bot.ConversationHistory.
 func (bot *Bot) GetChatHistory(chatID string) error {
 	if bot.Id == 0 {
-		errorLog.Fatal("No bot exists")
+		return fmt.Errorf("No bot exists")
 	}
 	url := fmt.Sprintf("%sconversation/history/%d/%s", baseURL, bot.Id, chatID)
 	statusCode, body, err := makeRequest("GET", url, nil)
