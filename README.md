@@ -90,7 +90,7 @@ To update information of a specific bot, use the `app.UpdateBot` placing the bot
 ```go
 example_bot.Name = "New Name"
 
-if err := app.Update(example_bot); if err != nil {
+if err := app.UpdateBot(example_bot); err != nil {
     log.Fatal(err)
 }
 ```
@@ -98,7 +98,7 @@ if err := app.Update(example_bot); if err != nil {
 ### Delete A Bot
 To delete a bot, use the `app.DeleteBot` method filling in the ID of the bot as a parameter. It will return an error if any:
 ```go
-if err := app.Delete(bot_id); if err != nil {
+if err := app.DeleteBot(bot_id); err != nil {
     log.Fatal(err)
 }
 ```
@@ -146,7 +146,7 @@ newIntent := []string{"example intent content"}
 
 // I am ignoring errors but you should handle them 
 example_bot.AddIntent(title, newIntent)
-app.Update(example_bot)
+app.UpdateBot(example_bot)
 ```
 *Note that this WILL NOT delete previous `Intents`. It will simple add itself to them.*
 
@@ -244,7 +244,7 @@ fmt.Println(example_bot.Conversation.Message)
 ### Check Chat State
 You can check the current and next state of the chat using the `bot.ChatState` method. The states are stored at the `bot.Conversation` field.
 ```go
-if err := example_bot.ChatStatus(); err != nil {
+if err := example_bot.ChatState(); err != nil {
     log.Fatal(err)
 }
 
@@ -255,11 +255,11 @@ fmt.Println(example_bot.Conversation.CurrentState)
 ### Get Chat History
 You can fetch the history of a specific chat ID using the `bot.GetChatHistory` method passing in the chat ID as a parameter. The history will be saved in the `bot.ConversationHistory` field.
 ```go
-if err := bot.GetChatHistory("chat_id"); err != nil {
+if err := example_bot.GetChatHistory("chat_id"); err != nil {
     log.Fatal(err)
 }
 
-for _, chat := range bot.ConversationHistory {
+for _, chat := range example_bot.ConversationHistory {
 	fmt.Printf("id: %d\nmessage: %s\nsender: %s\nresponse: %v\nreceived time: %s\n\n", chat.ID, chat.Message, chat.Sender, chat.Response, chat.ReceivedTime)
 }
 ```
@@ -267,11 +267,11 @@ for _, chat := range bot.ConversationHistory {
 ### Get Chat Users
 To get a list of all users communicating with your bot, use the `bot.GetChatUsers` method. The list of chats information will be stored in the `bot.ChatUsers` field.
 ```go
-if err := bot.GetChatUsers(); err != nil {
+if err := example_bot.GetChatUsers(); err != nil {
     log.Fatal(err)
 }
 
-for _, chat := range bot.ChatUsers {
+for _, chat := range example_bot.ChatUsers {
     fmt.Println(chat.ChatID)
     fmt.Println(chat.ReceivedTime)
 }
@@ -280,11 +280,11 @@ for _, chat := range bot.ChatUsers {
 ### Predict A Message 
 To get a prediction of a particular message on your bot, use the `bot.Predict` method with the message as a parameter. The result of the prediction will be stored in the `bot.Prediction` field.
 ```go
-if err := bot.Predict("Hey"); err != nil {
+if err := example_bot.Predict("Hey"); err != nil {
     log.Fatal(err)
 }
 
-fmt.Println(bot.Prediction.Confidence)
+fmt.Println(example_bot.Prediction.Confidence)
 ```
 
 ## Additional Resources
