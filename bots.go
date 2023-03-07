@@ -105,8 +105,10 @@ func (bot *Bot) CreateFlows(flows string) error {
 }
 
 // AddFlow method to add a new flow. It accepts a string
-// that will be the title of the flow, and a type flow
-// that will be the flow content.
+// that will be the title of the flow and an interface.
+// To allow ability to add choices, flow has been made an
+// interface.
+// See: https://docs.sarufi.io/docs/Getting%20started%20/chatbots-addons#handling-choices
 func (bot *Bot) AddFlow(node string, flow interface{}) error {
 	if bot.Id == 0 {
 		return fmt.Errorf("No bot exists")
