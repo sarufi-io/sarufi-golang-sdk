@@ -1,8 +1,8 @@
 <h1 align="center">Sarufi Golang SDK</h1>
 <p align="center">
-[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/gomods/athens.svg)](https://github.com/sarufi-io/sarufi-golang-sdk)
-[![GoDoc reference example](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/sarufi-io/sarufi-golang-sdk)
+<img src="https://img.shields.io/badge/Made%20with-Go-1f425f.svg">
+<img src="https://img.shields.io/github/go-mod/go-version/gomods/athens.svg">
+<a href="https://pkg.go.dev/github.com/sarufi-io/sarufi-golang-sdk"><img src="https://img.shields.io/badge/godoc-reference-blue.svg"></a>
 </p>
 Golang SDK for [Sarufi Conversational AI Platform](https://docs.sarufi.io/). Made with love for Gophers.
 
