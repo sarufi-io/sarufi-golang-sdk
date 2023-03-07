@@ -53,7 +53,7 @@ func (app *Application) GetBot(id int) (*Bot, error) {
 }
 
 // GetBots() method returns a list of type Bot and an error
-func (app *Application) GetBots() ([]Bot, error) {
+func (app *Application) GetAllBots() ([]Bot, error) {
 	if !checkToken(token) {
 		return nil, fmt.Errorf("Error: No token available")
 	}

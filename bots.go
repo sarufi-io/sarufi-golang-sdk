@@ -193,7 +193,7 @@ func (bot *Bot) Respond(message, channel string) error {
 // To get the current and next state of the chat. It
 // accepts no parameters. It will display the JSON
 // response from the API.
-func (bot *Bot) ChatStatus() error {
+func (bot *Bot) ChatState() error {
 	if bot.Id == 0 {
 		return fmt.Errorf("No bot exists")
 	}
