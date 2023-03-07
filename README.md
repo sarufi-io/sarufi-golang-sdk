@@ -1,6 +1,5 @@
 <h1 align="center">Sarufi Golang SDK</h1>
 <p align="center">
-Golang SDK for <a href="https://docs.sarufi.io/">Sarufi Conversational AI Platform</a>.<br><br>
 <img src="https://img.shields.io/badge/Made%20with-Go-1f425f.svg">
 <img src="https://img.shields.io/github/go-mod/go-version/gomods/athens.svg">
 <a href="https://pkg.go.dev/github.com/sarufi-io/sarufi-golang-sdk"><img src="https://img.shields.io/badge/godoc-reference-blue.svg"></a>
