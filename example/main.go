@@ -153,7 +153,6 @@ func main() {
 	fmt.Println(example_bot.Prediction.Confidence)
 
 	// Get User information
-
 	if err := app.GetUser(); err != nil {
 		log.Fatal(err)
 	}
