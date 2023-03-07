@@ -104,6 +104,17 @@ if err := app.DeleteBot(bot_id); err != nil {
 }
 ```
 
+### Get User 
+To get information about your user account use the `app.GetUser` method. The details of the user account will be stored on the `app.User` field:
+```go
+if err := app.GetUser(); err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println(app.User.ID)
+fmt.Println(app.User.Username)
+```
+
 ## Type Sarufi.Bot 
 This is the actual `Bot`. Below are explanations on all methods that affect a specific bot such as creating new intents, flows and so on.
 
