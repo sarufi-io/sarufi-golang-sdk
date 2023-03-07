@@ -52,7 +52,7 @@ func (bot *Bot) CreateIntents(intents string) error {
 // strings that will be the intent content.
 func (bot *Bot) AddIntent(title string, message []string) error {
 	if bot.Id == 0 {
-		return fmt.Errorf("No boy exists")
+		return fmt.Errorf("No bot exists")
 	}
 	bot.Intents[title] = message
 	return nil
@@ -63,7 +63,7 @@ func (bot *Bot) AddIntent(title string, message []string) error {
 // If the title does not exist no error will be displayed.
 func (bot *Bot) DeleteIntent(title string) error {
 	if bot.Id == 0 {
-		return fmt.Errorf("No boy exists")
+		return fmt.Errorf("No bot exists")
 	}
 	delete(bot.Intents, title)
 	return nil
@@ -75,7 +75,7 @@ func (bot *Bot) DeleteIntent(title string) error {
 // json file (eg: flows.json)
 func (bot *Bot) CreateFlows(flows string) error {
 	if bot.Id == 0 {
-		return fmt.Errorf("No boy exists")
+		return fmt.Errorf("No bot exists")
 	}
 	if fileChecker(flows) {
 		newFlows, err := ioutil.ReadFile(flows)
@@ -107,9 +107,9 @@ func (bot *Bot) CreateFlows(flows string) error {
 // AddFlow method to add a new flow. It accepts a string
 // that will be the title of the flow, and a type flow
 // that will be the flow content.
-func (bot *Bot) AddFlow(node string, flow Flow) error {
+func (bot *Bot) AddFlow(node string, flow interface{}) error {
 	if bot.Id == 0 {
-		return fmt.Errorf("No boy exists")
+		return fmt.Errorf("No bot exists")
 	}
 	bot.Flows[node] = flow
 	return nil
@@ -120,7 +120,7 @@ func (bot *Bot) AddFlow(node string, flow Flow) error {
 // If the title does not exist no error will be displayed.
 func (bot *Bot) DeleteFlow(title string) error {
 	if bot.Id == 0 {
-		return fmt.Errorf("No boy exists")
+		return fmt.Errorf("No bot exists")
 	}
 	delete(bot.Flows, title)
 	return nil
@@ -131,7 +131,7 @@ func (bot *Bot) DeleteFlow(title string) error {
 // See: https://neurotech-africa.stoplight.io/docs/sarufi/4a3ab3e807c34-handle-conversation
 func (bot *Bot) Respond(message, channel string) error {
 	if bot.Id == 0 {
-		return fmt.Errorf("No boy exists")
+		return fmt.Errorf("No bot exists")
 	}
 	url := baseURL + "conversation/"
 
