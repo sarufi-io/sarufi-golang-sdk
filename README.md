@@ -56,6 +56,7 @@ example_bot, err := app.CreateBot("Name of your bot", "Description", "Industry",
 if err != nil {
     log.Fatal(err)
 }
+
 fmt.Println(example_bot.Name)
 ```
 
