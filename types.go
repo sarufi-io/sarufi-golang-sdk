@@ -1,10 +1,5 @@
 package sarufi
 
-// Application will hold all application
-// methods.
-type Application struct {
-}
-
 // Type Bot. All the fields are matched to the API JSON response.
 // You can read more here https://neurotech-africa.stoplight.io/docs/sarufi/a3135fbb09470-create-new-chatbot
 type Bot struct {
@@ -68,4 +63,20 @@ type Conversation struct {
 	Memory       map[string]string `json:"memory"`
 	CurrentState string            `json:"current_state"`
 	NextState    string            `json:"next_state"`
+}
+
+// Application will hold all application methods.
+// It also has details about the user
+type Application struct {
+	User User `json:"user"`
+}
+
+type User struct {
+	ID          int    `json:"id"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	Mobile      string `json:"mobile"`
+	IsAdmin     bool   `json:"is_admin"`
+	DateCreated string `json:"date_created"`
+	UpdatedAt   string `json:"updated_at"`
 }
