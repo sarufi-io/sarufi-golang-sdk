@@ -69,14 +69,3 @@ type Conversation struct {
 	CurrentState string            `json:"current_state"`
 	NextState    string            `json:"next_state"`
 }
-
-// Type Flow to create a new Flow XD.
-// Message is a slice of strings.
-// NextState is simply a string.
-type Flow struct {
-	Message   []string `json:"message"`
-	NextState string   `json:"next_state"`
-}
-
-// Type Flows to map a string to the type Flow.
-type Flows map[string]interface{}
