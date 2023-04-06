@@ -7,7 +7,7 @@
 
 
 ## Pre-requisites
-You need to register with [Sarufi](https://docs.sarufi.io/) in order to get your login credentials.
+You need to register with [Sarufi](https://docs.sarufi.io/) in order to get your login credentials (client ID and client secret).
 
 ## Installation
 Simply install with the `go get` command:
@@ -37,7 +37,7 @@ To get a token, first create a new variable of type `sarufi.Application` and sig
 ```go
 var app sarufi.Application
 
-if err := app.GetToken("username", "password"); err != nil {
+if err := app.GetToken("client_id", "client_secret"); err != nil {
     log.Fatal(err)
 }
 ```
