@@ -12,12 +12,12 @@ import (
 // GetToken() method to generate a token for the user.
 // The received token will be saved to Application.Token
 // otherwise it will return an error.
-func (app *Application) GetToken(username, password string) error {
-	url := baseURL + "users/login"
+func (app *Application) GetToken(client_id, client_secret string) error {
+	url := baseURL + "api/access_token"
 
 	params := map[string]string{
-		"username": username,
-		"password": password,
+		"client_id":     client_id,
+		"client_secret": client_secret,
 	}
 
 	jsonParams, err := json.Marshal(params)
@@ -51,8 +51,8 @@ func (app *Application) GetToken(username, password string) error {
 	switch resp.StatusCode {
 	case 200:
 		var result struct {
-			Message string `json:"message"`
-			Token   string `json:"token"`
+			Expires int    `json:"expires_in"`
+			Token   string `json:"access_token"`
 		}
 		err := json.Unmarshal([]byte(body), &result)
 		if err != nil {
