@@ -11,41 +11,12 @@ func main() {
 	var app sarufi.Application
 
 	// Getting Token
-	if err := app.GetToken("string", "string"); err != nil {
-		log.Fatal(err)
-	}
-
-	// Getting all bots
-	myBots, err := app.GetAllBots()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, bot := range myBots {
-		fmt.Printf("%d: %s\n", bot.Id, bot.Name)
-	}
-
-	// Getting a single bot
-	example_bot, err := app.GetBot(myBots[0].Id)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Updating a bot
-	example_bot.Name = "New Name"
-
-	if err = app.UpdateBot(example_bot); err != nil {
-		log.Fatal(err)
-	}
-
-	// Deleting a bot
-	if err = app.DeleteBot(449); err != nil {
+	if err := app.GetToken("client_id", "client_secret"); err != nil {
 		log.Fatal(err)
 	}
 
 	// Create a new bot
-	example_bot, err = app.CreateBot("Name of your bot", "Description", "Industry", false)
+	example_bot, err := app.CreateBot("Name of your bot", "Description", "Industry", false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -158,5 +129,34 @@ func main() {
 	}
 
 	fmt.Println(app.User.ID)
+
+	// Getting all bots
+	myBots, err := app.GetAllBots()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, bot := range myBots {
+		fmt.Printf("%d: %s\n", bot.Id, bot.Name)
+	}
+
+	// Getting a single bot
+	example_bot, err = app.GetBot(myBots[0].Id)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Updating a bot
+	example_bot.Name = "New Name"
+
+	if err = app.UpdateBot(example_bot); err != nil {
+		log.Fatal(err)
+	}
+
+	// Deleting a bot
+	if err = app.DeleteBot(example_bot.Id); err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(app.User.Username)
 }
