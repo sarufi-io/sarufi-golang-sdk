@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const baseURL = "https://api.sarufi.io/"
+const baseURL = "https://developers.sarufi.io/"
 
 var token = ""
 
@@ -30,10 +30,7 @@ func fileChecker(fileName string) bool {
 }
 
 func checkToken(token string) bool {
-	if token != "" {
-		return true
-	}
-	return false
+	return token != ""
 }
 
 // A helper function to make requests easier
