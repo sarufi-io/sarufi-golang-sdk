@@ -10,10 +10,8 @@ import (
 func main() {
 	var app sarufi.Application
 
-	// Getting Token
-	if err := app.GetToken("client_id", "client_secret"); err != nil {
-		log.Fatal(err)
-	}
+	// Set Token
+	app.SetToken("your_api_key")
 
 	// Create a new bot
 	example_bot, err := app.CreateBot("Name of your bot", "Description", "Industry", false)
