@@ -20,7 +20,7 @@ And import it to your package as:
 package main
 
 import (
-    sarufi "github.com/sarufi-io/sarufi-golang-sdk@v0.2.1"
+    sarufi "github.com/sarufi-io/sarufi-golang-sdk@v0.3.0"
 )
 ```
 
