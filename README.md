@@ -12,7 +12,7 @@ You need to register with [Sarufi](https://docs.sarufi.io/) in order to get your
 ## Installation
 Simply install with the `go get` command:
 ```bash
-go get github.com/sarufi-io/sarufi-golang-sdk@v0.2.1
+go get github.com/sarufi-io/sarufi-golang-sdk@v0.3.0
 ```
 
 And import it to your package as:
