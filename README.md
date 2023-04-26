@@ -32,14 +32,12 @@ I have divided the explanation into two parts;
 ## Type Sarufi.Application 
 This type handles tasks that affect all bots such getting all bots, creating new bots and so on. Detailed explanation below.
 
-### Getting Token 
-To get a token, first create a new variable of type `sarufi.Application` and sign in with your credentials as shown below. The method will return an error if any:
+### Set Token 
+First create a new variable of type `sarufi.Application` and place your API KEY as shown below. You can get your API key from your [Sarufi Dashboard](https://www.sarufi.io/profile?tab=authorization)
 ```go
 var app sarufi.Application
 
-if err := app.GetToken("client_id", "client_secret"); err != nil {
-    log.Fatal(err)
-}
+app.GetToken("your_api_key")
 ```
 
 ### Creating a New Bot
