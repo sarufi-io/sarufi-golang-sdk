@@ -8,7 +8,6 @@ type Bot struct {
 	Industry              string                 `json:"industry"`
 	Description           string                 `json:"description"`
 	UserID                int                    `json:"user_id"`
-	Username              string                 `json:"user_name"`
 	VisibleOnCommunity    bool                   `json:"visible_on_community"`
 	Intents               map[string][]string    `json:"intents"`
 	Flows                 map[string]interface{} `json:"flows"`
@@ -16,8 +15,6 @@ type Bot struct {
 	WebhookURL            string                 `json:"webhook_url"`
 	WebhookTriggerIntents []string               `json:"webhook_trigger_intents"`
 	EvaluationMetrics     interface{}            `json:"evaluation_metrics"`
-	CreatedAt             string                 `json:"created_at"`
-	UpdatedAt             string                 `json:"updated_at"`
 	ChatID                string                 `json:"chat_id"`
 	Conversation          Conversation
 	Prediction            Prediction
@@ -73,6 +70,7 @@ type Application struct {
 
 type User struct {
 	ID          int    `json:"id"`
+	FullName    string `json:"full_name"`
 	Username    string `json:"username"`
 	Password    string `json:"password"`
 	Mobile      string `json:"mobile"`
