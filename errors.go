@@ -52,12 +52,12 @@ func (c *ConflictError) Error() string {
 }
 
 type UnprocessableEntity struct {
-	Detail Detail `json:"detail"`
+	Detail []Detail `json:"detail"`
 }
 
 func (ue *UnprocessableEntity) Error() string {
 	if ue != nil {
-		return fmt.Sprintf("status code 422: %s", ue.Detail.Message)
+		return fmt.Sprintf("status code 422: %s", ue.Detail[0].Message)
 	}
 	return ""
 }
