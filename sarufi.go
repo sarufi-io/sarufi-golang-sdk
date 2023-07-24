@@ -248,44 +248,47 @@ func (app *Application) DeleteBot(id int) error {
 }
 
 // Get user's information
-func (app *Application) GetUser() error {
+func (app *Application) GetUser() (*User, error) {
 	if !checkToken(token) {
-		return fmt.Errorf("Error: No token available")
+		return nil, fmt.Errorf("Error: No token available")
 	}
 
-	url := baseURL
+	url := fmt.Sprintf("%sapi/profile", baseURL)
 	statusCode, body, err := makeRequest("GET", url, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	switch statusCode {
 	case 200:
 		if err := json.Unmarshal(body, &app.User); err != nil {
-			return err
+			return nil, err
 		}
-		return nil
+		var user *User
+		user = &app.User
+
+		return user, nil
 	case 401:
 		var unauthorized Unauthorized
 		if err := json.Unmarshal(body, &unauthorized); err != nil {
-			return err
+			return nil, err
 		}
-		return fmt.Errorf("Error %s", unauthorized.Error())
+		return nil, fmt.Errorf("Error %s", unauthorized.Error())
 	case 404:
 		var notFound NotFoundError
 		if err := json.Unmarshal(body, &notFound); err != nil {
-			return err
+			return nil, err
 		}
-		return fmt.Errorf("Error %s", notFound.Error())
+		return nil, fmt.Errorf("Error %s", notFound.Error())
 	case 422:
 		var unprocessableEntity *UnprocessableEntity
 		if err := json.Unmarshal(body, &unprocessableEntity); err != nil {
-			return err
+			return nil, err
 		}
-		return fmt.Errorf("Error %s", unprocessableEntity.Error())
+		return nil, fmt.Errorf("Error %s", unprocessableEntity.Error())
 	case 500:
-		return fmt.Errorf("Error status code 500: Internal Server Error")
+		return nil, fmt.Errorf("Error status code 500: Internal Server Error")
 	default:
-		return fmt.Errorf(string(body))
+		return nil, fmt.Errorf(string(body))
 	}
 }
