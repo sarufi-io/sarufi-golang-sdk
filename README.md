@@ -102,15 +102,16 @@ if err := app.DeleteBot(bot_id); err != nil {
 }
 ```
 
-### Get User 
-To get information about your user account use the `app.GetUser` method. The details of the user account will be stored on the `app.User` field:
+### Get Profile 
+To get information about your user account use the `app.GetUser` method. The details of the user account will also be stored in the `app.User` field:
 ```go
-if err := app.GetUser(); err != nil {
+profile, err := app.GetUser()
+if err != nil {
     log.Fatal(err)
 }
 
-fmt.Println(app.User.ID)
-fmt.Println(app.User.Username)
+fmt.Println(profile.ID)
+fmt.Println(profile.FullName)
 ```
 
 ## Type Sarufi.Bot 
