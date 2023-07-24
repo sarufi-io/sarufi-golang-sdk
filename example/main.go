@@ -11,7 +11,7 @@ func main() {
 	var app sarufi.Application
 
 	// Set Token
-	app.SetToken("your_api_key")
+	app.SetToken("your_api_token")
 
 	// Create a new bot
 	example_bot, err := app.CreateBot("Name of your bot", "Description", "Industry", false)
@@ -19,6 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(example_bot.Name)
+	example_id := example_bot.Id // For deleting this example bot later
 
 	// Creating new intents
 	intents := `
@@ -76,8 +77,13 @@ func main() {
 	}`
 
 	// I am ignoring errors but you should handle them
-	example_bot.CreateFlows(newFlow)
-	app.UpdateBot(example_bot)
+	if err := example_bot.CreateFlows(newFlow); err != nil {
+		fmt.Println(err)
+	}
+
+	if err := app.UpdateBot(example_bot); err != nil {
+		fmt.Println(err)
+	}
 
 	fmt.Println(example_bot)
 
@@ -122,11 +128,13 @@ func main() {
 	fmt.Println(example_bot.Prediction.Confidence)
 
 	// Get User information
-	if err := app.GetUser(); err != nil {
+	profile, err := app.GetUser()
+	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(app.User.ID)
+	fmt.Println(profile.ID)
+	fmt.Println(profile.Username)
 
 	// Getting all bots
 	myBots, err := app.GetAllBots()
@@ -139,7 +147,7 @@ func main() {
 	}
 
 	// Getting a single bot
-	example_bot, err = app.GetBot(myBots[0].Id)
+	example_bot, err = app.GetBot(example_id)
 
 	if err != nil {
 		log.Fatal(err)
