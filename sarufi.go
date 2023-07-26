@@ -122,7 +122,11 @@ func (app *Application) CreateBot(name, description, industry string, visible bo
 		return nil, err
 	}
 
-	statusCode, body, _ := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
+	statusCode, body, err := makeRequest("POST", url, bytes.NewBuffer(jsonParams))
+
+	if err != nil {
+		return nil, err
+	}
 
 	switch statusCode {
 	case 200:
