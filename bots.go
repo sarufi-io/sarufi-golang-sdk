@@ -161,6 +161,13 @@ func (bot *Bot) Respond(message, channel string) error {
 	}
 	switch statusCode {
 	case 200:
+		if bot.ModelName == "" {
+			if err := json.Unmarshal(body, &bot.ConversationWithKnowledge); err != nil {
+				return err
+			}
+			return nil
+		}
+
 		if err := json.Unmarshal(body, &bot.Conversation); err != nil {
 			return err
 		}
