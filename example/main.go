@@ -92,14 +92,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(example_bot.Conversation.Message)
-
-	// Get chat state
-	if err := example_bot.ChatState(); err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(example_bot.Conversation.CurrentState)
+	fmt.Println(example_bot.Conversation.Message[0])
 
 	// Get Chat History
 	if err := example_bot.GetChatHistory(example_bot.ChatID); err != nil {
@@ -107,7 +100,7 @@ func main() {
 	}
 
 	for _, chat := range example_bot.ConversationHistory {
-		fmt.Printf("id: %d\nmessage: %s\nsender: %s\nresponse: %v\nreceived time: %s\n\n", chat.ID, chat.Message, chat.Sender, chat.Response, chat.ReceivedTime)
+		fmt.Printf("id: %d\nmessage: %s\nsender: %s\nresponse: %v\nreceived time: %s\n\n", chat.ID, chat.Message, chat.Sender, chat.Response[0].Message[0], chat.ReceivedTime)
 	}
 
 	// Get Chat Users
